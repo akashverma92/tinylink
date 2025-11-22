@@ -1,11 +1,10 @@
 import { pool } from "@/lib/db";
 
-// GET -> Get stats for a specific code
-export async function GET(request, context) {
-  const { code } = await context.params;
+export async function GET(request, { params }) {
+  const { code } = params;
 
   const result = await pool.query(
-    "SELECT * FROM links WHERE code=$1",
+    "SELECT * FROM links WHERE code = $1",
     [code]
   );
 
@@ -13,12 +12,11 @@ export async function GET(request, context) {
     return Response.json({ error: "Link not found" }, { status: 404 });
   }
 
-  return Response.json(result.rows[0]);
+  return Response.json(result.rows[0], { status: 200 });
 }
 
-// DELETE -> Delete a specific short link
-export async function DELETE(req, { params }) {
-  const { code } = params;
+export async function DELETE(request, { params }) {
+  const { code } = await params;
 
   try {
     const existing = await pool.query(
@@ -39,7 +37,6 @@ export async function DELETE(req, { params }) {
       { message: "Deleted successfully" },
       { status: 200 }
     );
-
   } catch (err) {
     console.error("DELETE ERROR:", err);
     return Response.json({ error: "Server error" }, { status: 500 });
